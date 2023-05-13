@@ -1,1 +1,1 @@
-# Spring Boot, Postgresql, jWt,Jpa, Spring Security, Rest API
+# Spring Boot, Postgresql, Jwt, Jpa, Spring Security, Rest API
