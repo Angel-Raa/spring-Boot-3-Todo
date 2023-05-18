@@ -5,6 +5,7 @@ import com.caja.ideal.auth.AuthenticateService;
 import com.caja.ideal.mapper.UserMapper;
 import com.caja.ideal.request.AuthenticationRequest;
 import com.caja.ideal.request.RegisterRequest;
+import com.caja.ideal.request.RegistrationRequest;
 import com.caja.ideal.service.IUserService;
 import com.caja.ideal.user.UserModel;
 import jakarta.validation.Valid;
@@ -60,4 +61,14 @@ public class UserController {
     public ResponseEntity<AuthenticateResponse> authenticate(@RequestBody AuthenticationRequest request){
         return ResponseEntity.ok(authenticateService.authenticate(request));
     }
+
+    // Demo
+    @PostMapping("/demo")
+    public String registerUser(RegistrationRequest request){
+        UserModel userModel = service.registerUser(request);
+        return """
+                Success! Please, check your email to complete your registration
+                """;
+    }
+
 }

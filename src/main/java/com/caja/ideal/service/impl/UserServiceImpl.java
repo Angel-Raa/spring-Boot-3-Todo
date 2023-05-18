@@ -4,6 +4,7 @@ import com.caja.ideal.exception.AlreadyExists;
 import com.caja.ideal.exception.ResourceNotFound;
 import com.caja.ideal.mapper.UserMapper;
 import com.caja.ideal.repository.IUserRepository;
+import com.caja.ideal.request.RegistrationRequest;
 import com.caja.ideal.service.IUserService;
 import com.caja.ideal.user.UserModel;
 import org.springframework.beans.BeanUtils;
@@ -31,9 +32,8 @@ public class UserServiceImpl implements IUserService {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public List<UserMapper> allUser() {
-        List<UserMapper> list = repository.findAll().stream().map(user -> new UserMapper(user.getEmail(), user.getPassword(), user.getUsername()))
+        return repository.findAll().stream().map(user -> new UserMapper(user.getEmail(), user.getPassword(), user.getUsername()))
                 .collect(Collectors.toList());
-        return list;
     }
 
     @Transactional
@@ -63,8 +63,7 @@ public class UserServiceImpl implements IUserService {
         }
 
         user.setPassword(encoder.encode(user.getPassword()));
-        UserModel save = repository.save(user);
-        return save;
+        return repository.save(user);
     }
 
     @Transactional
@@ -73,8 +72,7 @@ public class UserServiceImpl implements IUserService {
     public UserModel update(UserModel user, Long id) {
         UserModel userTo = repository.findById(id).orElseThrow(() -> new ResourceNotFound("this user does not exist"));
         BeanUtils.copyProperties(user, userTo, "id");
-        UserModel update = repository.save(userTo);
-        return update;
+        return repository.save(userTo);
     }
 
     @Transactional(readOnly = true)
@@ -82,5 +80,32 @@ public class UserServiceImpl implements IUserService {
     @Override
     public UserModel user(Long id) {
         return repository.findById(id).orElseThrow(() -> new ResourceNotFound("this user does not exist"));
+    }
+    @Transactional
+    @Override
+    public UserModel registerUser(RegistrationRequest request) {
+        Optional<UserModel> user = repository.findByEmail(request.email());
+        if(user.isPresent()){
+            throw new AlreadyExists("User with email ".concat(request.email().concat("Already exists")) );
+        }
+        UserModel newUser = createUser(request);
+        return repository.save(newUser);
+    }
+
+
+
+    @Transactional
+    @Override
+    public Optional<UserModel> findEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
+    private UserModel createUser(RegistrationRequest request) {
+        UserModel newUser = new UserModel();
+        newUser.setPassword(encoder.encode(request.password()));
+        newUser.setUsername(request.username());
+        newUser.setEmail(request.email());
+        newUser.setRole(request.role());
+        return newUser;
     }
 }

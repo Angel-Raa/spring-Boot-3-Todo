@@ -10,8 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.NaturalId;
 
 
+import java.io.Serializable;
 import java.util.List;
 
 @Builder
@@ -20,7 +22,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "users")
-public class UserModel {
+public class UserModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,9 +33,11 @@ public class UserModel {
     @Column(length = 20)
     private String password;
     @Email
+    @NaturalId(mutable = true)
     private String email;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private boolean isEnabled = false;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL,  fetch = FetchType.LAZY)
     private List<TokenModel> token ;
